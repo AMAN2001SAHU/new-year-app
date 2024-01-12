@@ -1,7 +1,7 @@
 const express = require('express');
-const { Todo } = require('./db');
 const z = require('zod');
-const { createTodo } = require('./types');
+const { Todo } = require('./db');
+const { createTodo, updateTodo } = require('./types');
 const { PORT } = require('./config/config');
 const app = express();
 
@@ -14,7 +14,7 @@ app.get('/todo', async (req, res) => {
   });
 });
 
-app.post('/todo', (req, res) => {
+app.post('/todo', async (req, res) => {
   const createPayload = req.body;
   const parseTodo = createTodo.safeParse(createPayload);
 
@@ -25,15 +25,30 @@ app.post('/todo', (req, res) => {
     return;
   }
 
-  Todo.create({
-    title,
-    description,
+  await Todo.create({
+    title: createPayload.title,
+    description: createPayload.description,
+  });
+
+  res.status(200).json({
+    msg: 'Todo created successfully',
   });
 });
 
-app.put('/todo/:id', (req, res) => {
+app.put('/todo/:id', async (req, res) => {
   const id = req.params.id;
-  Todo.find;
+  const parseId = updateTodo.safeParse(id);
+  if (!parseId.success) {
+    res.status(403).json({
+      msg: 'Id of Todo is incorrect',
+    });
+    return;
+  }
+  await Todo.findByIdAndUpdate(id, { done: true });
+
+  res.status(200).json({
+    msg: 'Marked Todo as done',
+  });
 });
 
 app.use((err, req, res, next) => {

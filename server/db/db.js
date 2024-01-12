@@ -6,7 +6,7 @@ mongoose.connect(MONGO_URL);
 const todoSchema = mongoose.Schema({
   title: String,
   description: String,
-  done: Boolean,
+  done: { type: Boolean, default: false },
 });
 
 const Todo = mongoose.model('todos', todoSchema);
